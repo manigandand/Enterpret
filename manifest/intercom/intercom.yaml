@@ -1,0 +1,18 @@
+version: v1
+name: Intercom
+slug: intercom
+isValid: true
+type: conversation
+supportDoc: https://www.enterpret.com/integrations/intercom
+subject: |
+  {{.conversation_message.subject}}
+message: |
+  {{.conversation_message.body}}
+language: english
+metadata: 
+  type: |
+    {{.conversation_message.type}}
+  id: |
+    {{.id}}
+  conversation_url: |
+    {{.conversation_message.url}}
