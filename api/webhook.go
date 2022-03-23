@@ -4,9 +4,7 @@ import (
 	"enterpret/errors"
 	"enterpret/ingester"
 	"enterpret/response"
-	"enterpret/schema"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi"
 )
@@ -30,7 +28,7 @@ func handleEvent(w http.ResponseWriter, r *http.Request) *errors.AppError {
 		return err
 	}
 
-	ingestion := ingester.NewIngestion(nil, nil, alertConfig)
+	ingestion := ingester.NewIngestion(org, integration, alertConfig)
 	headers := make(map[string]string)
 	for k := range r.Header {
 		headers[k] = r.Header.Get(k)
@@ -43,21 +41,6 @@ func handleEvent(w http.ResponseWriter, r *http.Request) *errors.AppError {
 		return ierr
 	}
 
-	alert := &schema.Alert{
-		CreatedAt:      time.Now(),
-		AlertConfigID:  alertConfig.ID,
-		IntegrationID:  integration.ID,
-		OrganizationID: org.ID,
-		Source:         alertConfig.Slug,
-		Type:           alertConfig.Type,
-		Subject:        data.Subject,
-		Message:        data.Message,
-		Language:       alertConfig.Language,
-		Metadata:       data.Metadata,
-		Raw:            data.Raw,
-	}
-	_, _ = store.Alerts().Save(alert)
-
-	response.Created(w, alert)
+	response.Created(w, data)
 	return nil
 }

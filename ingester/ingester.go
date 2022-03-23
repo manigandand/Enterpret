@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"enterpret/errors"
 	"enterpret/schema"
+	"enterpret/store"
+	"enterpret/store/adapter"
 	"enterpret/types"
+	"time"
 
 	// "errors"
 	"fmt"
@@ -30,6 +33,7 @@ type Ingester struct {
 	logger *log.Logger
 
 	variables map[string]interface{}
+	store     adapter.Store
 
 	*schema.AlertConfig
 }
@@ -51,6 +55,7 @@ func NewIngestion(org *schema.Organization, integ *schema.Integration, ac *schem
 		variables: make(map[string]interface{}),
 
 		AlertConfig: ac,
+		store:       store.Store,
 	}
 
 	return s
@@ -61,7 +66,7 @@ func (i *Ingester) Set(name string, val interface{}) {
 }
 
 // IngestFromReq ingests the incoming http.Request(JSON) data
-func (i *Ingester) IngestFromReq(r *http.Request) (*types.Ingester, *errors.AppError) {
+func (i *Ingester) IngestFromReq(r *http.Request) (*schema.Alert, *errors.AppError) {
 	body, err := i.decodeBody(r)
 	if err != nil {
 		return nil, err
@@ -70,7 +75,7 @@ func (i *Ingester) IngestFromReq(r *http.Request) (*types.Ingester, *errors.AppE
 	return i.Ingest(body), nil
 }
 
-func (i *Ingester) Ingest(data interface{}) *types.Ingester {
+func (i *Ingester) Ingest(data interface{}) *schema.Alert {
 	message := strings.TrimSpace(i.parseTmpl(i.Message, data))
 	subject := strings.TrimSpace(i.parseTmpl(i.Subject, data))
 
@@ -79,12 +84,30 @@ func (i *Ingester) Ingest(data interface{}) *types.Ingester {
 		meta[k] = strings.TrimSpace(i.parseTmpl(v, data))
 	}
 
-	return &types.Ingester{
+	return i.Save(&types.Ingester{
 		Subject:  subject,
 		Message:  message,
 		Metadata: meta,
 		Raw:      data,
+	})
+}
+
+func (i *Ingester) Save(data *types.Ingester) *schema.Alert {
+	alert := &schema.Alert{
+		CreatedAt:      time.Now(),
+		AlertConfigID:  i.ID,
+		IntegrationID:  i.integration.ID,
+		OrganizationID: i.organization.ID,
+		Source:         i.Slug,
+		Type:           i.Type,
+		Subject:        data.Subject,
+		Message:        data.Message,
+		Language:       i.Language,
+		Metadata:       data.Metadata,
+		Raw:            data.Raw,
 	}
+	_, _ = i.store.Alerts().Save(alert)
+	return alert
 }
 
 // IngestFromJSON ingests the incoming JSON data
@@ -157,6 +180,7 @@ func (i *Ingester) parseTmpl(gotmpl string, data interface{}) string {
 	// i.logger.Println("Parsing template 1: ", gohtmlTemplate)
 
 	tmpl := template.Must(i.renderTemplate.Clone())
+
 	tmpl.Delims(i.delimiters.Left, i.delimiters.Right)
 	tmpl.Funcs(template.FuncMap{
 		"tojson": func(v interface{}) string {

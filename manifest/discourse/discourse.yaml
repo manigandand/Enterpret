@@ -1,0 +1,21 @@
+version: v1
+name: Discourse
+slug: discourse
+isValid: true
+type: feedback
+supportDoc: https://www.enterpret.com/integrations/discourse
+subject: |
+  {{.topic_slug}}
+message: |
+  {{.cooked}}
+language: english
+metadata: 
+  username: |
+    {{.username}}
+  id: |
+    {{.id}}
+  reads: |
+    {{.reads}}
+  score: |
+    {{.score}}
+

@@ -34,6 +34,13 @@ func (c *Client) GetIntegrationByAPIKey(apiKey string) (*schema.Integration, *er
 	return c.integration, nil
 }
 
+func (c *Client) GetIntegrationByID(id uint) (*schema.Integration, *errors.AppError) {
+	if c.integration.ID != id {
+		return nil, errors.NotFound("invalid integration id")
+	}
+	return c.integration, nil
+}
+
 // Topic ...
 func (c *Client) AlertConfig() adapter.AlertConfig {
 	return c.AlertConfigConn

@@ -5,6 +5,7 @@ import (
 	"enterpret/config"
 	appmiddleware "enterpret/middleware"
 	"enterpret/store"
+	"enterpret/task"
 	"fmt"
 	"log"
 	"net/http"
@@ -30,6 +31,8 @@ func main() {
 	config.Initialize(os.Args[1:]...)
 	store.Init()
 	api.InitAPI(name, version)
+
+	go task.Start()
 
 	router := chi.NewRouter()
 	cors := cors.New(cors.Options{
