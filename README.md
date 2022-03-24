@@ -36,7 +36,7 @@ ex:
 > Push alert webhook
 > `POST localhost:8080/v1/alert/intercom/f14d887c-48bd-4a09-b8bc-04ca1461657b`
 
-```
+```json
 {
     "data": {
         "id": 1,
@@ -83,7 +83,7 @@ ex:
 > Get all alert configs
 > `GET localhost:8080/v1/alert-sources`
 
-```
+```json
 {
     "data": {
         "discourse": {
@@ -131,7 +131,7 @@ ex:
 > Get all alerts
 > `GET localhost:8080/v1/alerts`
 
-```
+```json
 {
     "data": [
         {
@@ -180,7 +180,7 @@ ex:
 }
 ```
 
-```
+```json
 {
     "data": [
         {
