@@ -24,8 +24,9 @@ Just build and run.
 
 go build && ./enterpret config.json
 
-you can see the available alert configs test endpoints
+you can see the available alert configs test endpoints in the console. 
 
+ex: 
 /v1/alert/discourse/914cf64e-c1dc-4a52-93a9-b456042d3e21
 /v1/alert/intercom/914cf64e-c1dc-4a52-93a9-b456042d3e21
 ```
